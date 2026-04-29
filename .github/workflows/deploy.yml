@@ -32,4 +32,4 @@ jobs:
             docker stop project-3-web || true
             docker rm project-3-web || true
             docker pull ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
-            docker run -d -p 80:80 --name project-3-web ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
+            docker run -d -p 8080:80 --name project-3-web ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
