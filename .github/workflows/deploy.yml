@@ -1,4 +1,4 @@
-name: Deploy Website to EC2
+name: CI/CD Docker Deployment
 
 on:
   push:
@@ -10,24 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy files to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "index.html,style.css"
-          target: "/var/www/html"
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Restart Apache on EC2
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
+
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo systemctl restart httpd
-            sudo systemctl status httpd --no-pager
+            docker stop project-3-web || true
+            docker rm project-3-web || true
+            docker pull ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
+            docker run -d -p 80:80 --name project-3-web ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
