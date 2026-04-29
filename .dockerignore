@@ -1,0 +1,5 @@
+.git
+.github
+README.md
+
+# Don’t send unnecessary files into the Docker build context.
