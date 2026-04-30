@@ -17,11 +17,20 @@ jobs:
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      - name: Set Image tag
+        id: vars
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web .
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest \
+                       -t ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:${{ env.TAG }} .
+    # TAG variable is defined dynamically via GITHUB_ENV and contains the short SHA of the commit, which serves as a unique tag for the Docker image.
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:${{ env.TAG }}
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -32,5 +41,5 @@ jobs:
           script: |
             docker stop project-3-web || true
             docker rm project-3-web || true
-            docker pull ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
-            docker run -d -p 8080:80 --name project-3-web ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web
+            docker pull ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest
+            docker run -d -p 8080:80 --name project-3-web ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest
