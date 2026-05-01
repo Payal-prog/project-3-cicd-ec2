@@ -1,0 +1,4 @@
+Version: Dockerized CI/CD Deployment
+Environment: AWS EC2 behind ALB
+Build: GitHub Actions
+Status: Active

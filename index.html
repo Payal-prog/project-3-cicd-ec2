@@ -1,12 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Project 3 CI/CD Pipeline, Docker-based deployment</title>
-  <h1>CI/CD Pipeline Working!</h1>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI/CD Pipeline | Docker Deployment</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 18px;
+      color: #cfd8dc;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      text-align: left;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      color: #00ff9d;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .highlight {
+      color: #00ff9d;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #aaaaaa;
+    }
+
+    /* Animation */
+    .container {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <h1>CI/CD Pipeline Deployed Successfully.</h1>
-  <p>This docker-based website is automatically deployed to AWS EC2 using GitHub Actions</p>
+  <div class="container">
+    
+    <h1>CI/CD Pipeline Active</h1>
+    <div class="tagline">
+      Automated Docker-based deployment on AWS using GitHub Actions
+    </div>
+
+    <div class="card">
+      <h3>Project Overview</h3>
+      <p>
+        This application demonstrates a fully automated <span class="highlight">CI/CD pipeline</span> 
+        that builds, versions, and deploys a containerized web application to AWS infrastructure.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Deployment Flow</h3>
+      <ul>
+        <li>Code pushed to GitHub</li>
+        <li>GitHub Actions builds Docker image</li>
+        <li>Image tagged with <span class="highlight">latest + commit SHA</span></li>
+        <li>Pushed to Docker Hub</li>
+        <li>Deployed to AWS EC2 via SSH</li>
+        <li>Application served through <span class="highlight">Application Load Balancer</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Architecture</h3>
+      <ul>
+        <li>Application Load Balancer (public access)</li>
+        <li>EC2 instance (private, secured)</li>
+        <li>Docker container (Nginx)</li>
+        <li>Health checks via <span class="highlight">/health.html</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Key Features</h3>
+      <ul>
+        <li>Automated CI/CD pipeline</li>
+        <li>Dockerized deployment</li>
+        <li>Versioned images (Git SHA)</li>
+        <li>Manual + auto workflow triggers</li>
+        <li>Container auto-restart policy</li>
+        <li>Secure access via ALB (no direct EC2 exposure)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+    <h3>Deployment Metadata</h3>
+    <ul>
+      <li>Deployment Type: <span class="highlight">Containerized CI/CD</span></li>
+      <li>Image Registry: <span class="highlight">Docker Hub</span></li>
+      <li>Web Server: <span class="highlight">Nginx inside Docker</span></li>
+      <li>Traffic Path: <span class="highlight">ALB → EC2:8080 → Container:80</span></li>
+      <li>Health Endpoint: <span class="highlight">/health.html</span></li>
+    </ul>
+
+    </div>
+    <footer>
+      Built by Payal • Cloud & DevOps Project
+    </footer>
+
+  </div>
 </body>
 </html>
