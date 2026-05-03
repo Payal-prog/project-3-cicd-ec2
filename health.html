@@ -24,8 +24,6 @@
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(10px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-
-      /* Animation */
       opacity: 0;
       transform: scale(0.95);
       animation: fadeIn 0.8s ease-out forwards;
@@ -35,8 +33,6 @@
       font-size: 28px;
       font-weight: bold;
       color: #00ff9d;
-
-      /* Pulse animation */
       animation: pulse 2s infinite;
     }
 
@@ -46,7 +42,18 @@
       color: #d1d1d1;
     }
 
-    /* Fade + scale */
+    .meta {
+      margin-top: 20px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #ffffff;
+    }
+
+    .highlight {
+      color: #00ff9d;
+      font-weight: bold;
+    }
+
     @keyframes fadeIn {
       to {
         opacity: 1;
@@ -54,7 +61,6 @@
       }
     }
 
-    /* Subtle pulse */
     @keyframes pulse {
       0% { opacity: 1; }
       50% { opacity: 0.6; }
@@ -67,6 +73,12 @@
   <div class="container">
     <div class="status">✔ HEALTH CHECK: OK</div>
     <div class="subtitle">Application is running and reachable</div>
+
+    <div class="meta">
+      <div>Instance ID: <span class="highlight">__INSTANCE_ID__</span></div>
+      <div>Private IP: <span class="highlight">__PRIVATE_IP__</span></div>
+      <div>Availability Zone: <span class="highlight">__AZ__</span></div>
+    </div>
   </div>
 </body>
 </html>
