@@ -9,8 +9,6 @@ The project started as a simple EC2 deployment and was upgraded into a more prod
 ---
 
 ## Architecture
-
-```text
 Developer
    |
    | git push
@@ -192,8 +190,7 @@ flowchart TD
     P --> Q[Users Access Application]
 
     O --> R[Health Check: /health.html]
-
-    
+       
 ---
 
 # What this shows
