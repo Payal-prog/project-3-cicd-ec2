@@ -1,5 +1,6 @@
-name: CI/CD Docker Deployment
+name: CI/CD Docker Deployment with ASG Refresh
 
+# Triggers the workflow automatically on push to main, and also allows manual execution from the GitHub Actions UI.
 on:
   push:
     branches:
@@ -8,38 +9,47 @@ on:
 
 jobs:
   deploy:
+    # Runs the workflow on a temporary Ubuntu runner provided by GitHub.
     runs-on: ubuntu-latest
 
     steps:
+      # Downloads the repository code into the GitHub Actions runner. Without this, the runner would not have access to the Dockerfile or app files.
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Authenticates GitHub Actions with Docker Hub using stored GitHub Secrets. This allows the workflow to push Docker images to your Docker Hub repository.
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      # Creates a short image tag using the first 7 characters of the Git commit SHA. The tag is stored in GITHUB_ENV so it can be reused in later workflow steps.
+      # TAG variable is defined dynamically via GITHUB_ENV and contains the short SHA of the commit, which serves as a unique tag for the Docker image.
       - name: Set Image tag
         id: vars
         run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
+      # Builds the Docker image from the Dockerfile. The same image is tagged twice:
+      # 1. latest = easy reference to the newest image
+      # 2. commit SHA tag = unique version for traceability and rollback
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest \
                        -t ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:${{ env.TAG }} .
-    # TAG variable is defined dynamically via GITHUB_ENV and contains the short SHA of the commit, which serves as a unique tag for the Docker image.
-
+                       
+      # Pushes both Docker image tags to Docker Hub. Docker Hub will update the latest tag and also store the commit-specific version.
       - name: Push Docker image
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:${{ env.TAG }}
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
+      # Configures AWS credentials inside the GitHub Actions runner. This allows the workflow to call AWS APIs using the IAM user permissions.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker stop project-3-web || true
-            docker rm project-3-web || true
-            docker pull ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest
-            docker run -d --restart unless-stopped -p 8080:80 --name project-3-web ${{ secrets.DOCKER_USERNAME }}/project-3-cicd-web:latest
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      # This step triggers an instance refresh on the specified Auto Scaling Group (ASG) to deploy the new Docker image. The preferences ensure that at least 50% of instances remain healthy during the refresh, and each instance is given a warm-up time of 300 seconds before being considered healthy.
+      - name: Refresh ASG to deploy new image
+        run: |
+          aws autoscaling start-instance-refresh --auto-scaling-group-name "${{ secrets.ASG_NAME }}" --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 300}'
