@@ -9,6 +9,7 @@ The project started as a simple EC2 deployment and was upgraded into a more prod
 ---
 
 ## Architecture
+```text
 Developer
    |
    | git push
@@ -42,6 +43,7 @@ Application Load Balancer
    v
 Users access the app through ALB DNS
 
+```
 ## Tech Stack
 - AWS EC2
 - Application Load Balancer
@@ -210,3 +212,43 @@ GitHub push
 
 This architecture demonstrates a containerized CI/CD deployment pipeline on AWS.  
 Code changes pushed to GitHub trigger a GitHub Actions workflow, which builds and versions a Docker image, pushes it to Docker Hub, and refreshes the Auto Scaling Group. New EC2 instances launched through the Launch Template automatically install Docker, pull the latest image, run the containerized Nginx application, and register behind the Application Load Balancer. The ALB performs health checks using `/health.html` and routes traffic only to healthy instances.
+
+
+## Screenshots
+
+### 1. GitHub Actions CI/CD Workflow Success
+Shows the pipeline successfully building the Docker image, pushing it to Docker Hub, and triggering the Auto Scaling Group instance refresh.
+
+![GitHub Actions Success](screenshots/github-actions-success1.png)
+![GitHub Actions Success](screenshots/github-actions-success2.png)
+---
+
+### 2. Live Application via ALB
+Shows the deployed application being served through the Application Load Balancer DNS endpoint.
+
+![ALB Main Page](screenshots/alb-main-page1.png)
+![ALB Main Page](screenshots/alb-main-page2.png)
+
+---
+
+### 3. Health Check Endpoint
+Shows the `/health.html` endpoint returning a healthy response with instance metadata.
+
+![Health Check](screenshots/health-check1.png)
+![Health Check](screenshots/health-check2.png)
+![Health Check](screenshots/health-check3.png)
+---
+
+### 4. Auto Scaling Group Instance Refresh
+Shows ASG rolling deployment replacing old instances with new ones.
+
+![ASG Instance Refresh](screenshots/asg-instance-refresh1.png)
+![ASG Instance Refresh](screenshots/asg-instance-refresh2.png)
+
+---
+
+### 5. Target Group Health Checks
+Shows EC2 instances registered behind the ALB and passing health checks.
+
+![Target Group Healthy](screenshots/target-group-healthy.png)
+
