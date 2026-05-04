@@ -190,8 +190,8 @@ flowchart TD
     P --> Q[Users Access Application]
 
     O --> R[Health Check: /health.html]
-       
----
+
+```
 
 # What this shows
 
@@ -206,6 +206,7 @@ GitHub push
 → new EC2 instances
 → Docker container starts
 → ALB serves traffic
+```
 
 This architecture demonstrates a containerized CI/CD deployment pipeline on AWS.  
 Code changes pushed to GitHub trigger a GitHub Actions workflow, which builds and versions a Docker image, pushes it to Docker Hub, and refreshes the Auto Scaling Group. New EC2 instances launched through the Launch Template automatically install Docker, pull the latest image, run the containerized Nginx application, and register behind the Application Load Balancer. The ALB performs health checks using `/health.html` and routes traffic only to healthy instances.
