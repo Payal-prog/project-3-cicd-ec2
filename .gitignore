@@ -1,1 +1,12 @@
-.github/workflows/\!deploy.yml
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+.terraform.lock.hcl
+
+# Keys
+*.pem
+*.key
