@@ -64,6 +64,10 @@ Users access the app through ALB DNS
 - Dockerized static web application served through Nginx
 - Docker image tagging using both latest and Git commit SHA
 - Docker image pushed to Docker Hub
+- Infrastructure provisioned using Terraform
+- Reusable Terraform variables and outputs
+- EC2 Launch Template user data managed through Terraform
+- Auto Scaling Group and ALB provisioned through Infrastructure as Code
 - Application deployed behind an AWS Application Load Balancer
 - Auto Scaling Group launches EC2 instances automatically
 - Launch Template user data installs Docker and runs the container
@@ -172,27 +176,35 @@ Completed as a hands-on DevOps portfolio project demonstrating:
 ```mermaid
 flowchart TD
     A[Developer Pushes Code to GitHub] --> B[GitHub Actions Workflow]
+
     B --> C[Build Docker Image]
     C --> D[Tag Image: latest + Git SHA]
     D --> E[Push Image to Docker Hub]
     E --> F[Trigger ASG Instance Refresh]
 
-    F --> G[Auto Scaling Group]
-    G --> H[Launch Template]
-    H --> I[EC2 Instances]
+    T[Terraform Infrastructure as Code] --> V[VPC]
+    T --> S[Public Subnets across 2 AZs]
+    T --> SG[Security Groups]
+    T --> ALB[Application Load Balancer]
+    T --> TG[Target Group]
+    T --> LT[Launch Template]
+    T --> ASG[Auto Scaling Group]
 
-    I --> J[User Data Script]
-    J --> K[Install Docker]
-    K --> L[Pull Latest Docker Image]
-    L --> M[Run Nginx Container]
-    M --> N[Inject EC2 Metadata into HTML]
+    F --> ASG
+    ASG --> LT
+    LT --> EC2[EC2 Instances]
 
-    I --> O[Target Group]
-    O --> P[Application Load Balancer]
-    P --> Q[Users Access Application]
+    EC2 --> UD[User Data Script]
+    UD --> DCK[Install Docker]
+    DCK --> PULL[Pull Latest Docker Image]
+    PULL --> RUN[Run Nginx Container]
+    RUN --> META[Inject EC2 Metadata into HTML]
 
-    O --> R[Health Check: /health.html]
+    EC2 --> TG
+    TG --> ALB
+    ALB --> USER[Users Access Application via ALB DNS]
 
+    TG --> HC[Health Check: /health.html]
 ```
 
 # What this shows
@@ -251,4 +263,85 @@ Shows ASG rolling deployment replacing old instances with new ones.
 Shows EC2 instances registered behind the ALB and passing health checks.
 
 ![Target Group Healthy](screenshots/target-group-healthy.png)
+
+## Project 3B: Terraform Infrastructure as Code Upgrade
+
+This project was upgraded with Terraform to provision the AWS infrastructure using Infrastructure as Code instead of creating resources manually through the AWS Console.
+
+Terraform is used to create and manage the networking, load balancing, security, compute, and scaling components required to run the Dockerized application on AWS.
+
+---
+
+## Terraform Architecture
+
+```text
+Terraform
+   |
+   | provisions
+   v
+AWS Infrastructure
+   |
+   |-- VPC
+   |-- Public Subnets across 2 Availability Zones
+   |-- Internet Gateway
+   |-- Route Table
+   |-- Security Groups
+   |-- Application Load Balancer
+   |-- Target Group
+   |-- ALB Listener
+   |-- Launch Template
+   |-- Auto Scaling Group
+   v
+EC2 Instances
+   |
+   | user data
+   v
+```
+Install Docker → Pull Docker Image → Run Nginx Container → Inject EC2 Metadata
+
+## Terraform-Managed Resources
+- Custom VPC
+- Two public subnets across multiple Availability Zones
+- Internet Gateway
+- Public route table and subnet associations
+- ALB security group
+- EC2 security group
+- Application Load Balancer
+- Target Group with /health.html health checks
+- HTTP listener on port 80
+- Launch Template using Amazon Linux 2023
+- Auto Scaling Group attached to the ALB target group
+- EC2 user data script for Docker bootstrapping
+
+## Terraform Deployment Flow
+- Terraform provisions the VPC, public subnets, Internet Gateway, route table, and security groups.
+- Terraform creates an internet-facing Application Load Balancer.
+- Terraform creates a target group using port 8080 and health check path /health.html.
+- Terraform creates a Launch Template using Amazon Linux 2023.
+- Launch Template user data installs Docker, pulls the latest Docker image from Docker Hub, runs the Nginx container, and injects EC2 instance metadata into the application UI.
+- Terraform creates an Auto Scaling Group across two public subnets.
+- The ASG registers EC2 instances with the ALB target group.
+- The ALB routes traffic only to healthy EC2 instances.
+
+## Terraform + CI/CD Integration
+Terraform provisions the infrastructure, while GitHub Actions handles the application deployment lifecycle.
+
+```text
+Terraform
+   ↓
+Creates AWS infrastructure
+
+GitHub Actions
+   ↓
+Builds Docker image
+Pushes image to Docker Hub
+Triggers ASG Instance Refresh
+
+ASG
+   ↓
+Launches new EC2 instances
+Runs user data
+Pulls latest image
+Registers healthy targets behind ALB
+```
 
